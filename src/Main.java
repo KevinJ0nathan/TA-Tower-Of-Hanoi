@@ -2,14 +2,27 @@ import java.util.Scanner;
 import java.util.Stack;
 
 public class Main {
-    public static void towerOfHanoiRecursive(int n, char sourceRod, char targetRod, char tempRod){
+    public static void towerOfHanoiRecursive(int n, Stack<Integer> sourceRod, Stack<Integer> targetRod, Stack<Integer> tempRod, String source, String target, String temp) {
+        // Base case: If there's only one disk to move, directly move it from source to target.
         if (n == 1) {
-            System.out.println("Move disk 1 from rod " + sourceRod + " to rod " + targetRod);
+            System.out.println("Move disk " + sourceRod.peek() + " from " + source + " rod " + "to " + target + " rod ");
+            targetRod.push(sourceRod.pop());
+            printRodRecursive(sourceRod, targetRod, tempRod, source, target, temp);
             return;
         }
-        towerOfHanoiRecursive(n-1, sourceRod, tempRod, targetRod);
-        System.out.println("Move disk " + n + " from rod " + sourceRod + " to rod " + targetRod);
-        towerOfHanoiRecursive(n-1, tempRod, targetRod, sourceRod);
+        // Move n-1 disks from source to temporary rod using target as a temporary.
+        towerOfHanoiRecursive(n-1, sourceRod, tempRod, targetRod, source, temp, target);
+        System.out.println("Move disk " + sourceRod.peek() + " from " + source + " rod " + "to " + target + " rod ");
+        targetRod.push(sourceRod.pop());
+        printRodRecursive(sourceRod, targetRod, tempRod, source, target, temp);
+        // Move n-1 disks from temporary rod to target rod using source as a temporary.
+        towerOfHanoiRecursive(n-1, tempRod, targetRod, sourceRod, temp, target, source);
+    }
+
+    static void printRodRecursive(Stack<Integer> sourceRod, Stack<Integer> targetRod, Stack<Integer> tempRod, String source, String target, String temp) {
+        System.out.println(source + " Rod: " + sourceRod);
+        System.out.println(temp + " Rod: " + tempRod);
+        System.out.println(target + " Rod: " + targetRod);
     }
 
     public static void towerOfHanoiIterative(int n){
@@ -25,7 +38,7 @@ public class Main {
 
         // Prints out the initial states
         System.out.println("Initial:");
-        printRods(sourceRod, tempRod, targetRod);
+        printRodIterative(sourceRod, tempRod, targetRod);
 
         // If the number of disks is even, swap destination and auxiliary rods
         if (n % 2 == 0) {
@@ -38,7 +51,7 @@ public class Main {
                     moveDisk(targetRod, tempRod, "target", "temp");
                 }
                 System.out.println("After move " + i + ":");
-                printRods(sourceRod, tempRod, targetRod);
+                printRodIterative(sourceRod, tempRod, targetRod);
             }
             return;
         }
@@ -52,7 +65,7 @@ public class Main {
                 moveDisk(tempRod, targetRod, "temp", "target");
             }
             System.out.println("After move " + i + ":");
-            printRods(sourceRod, tempRod, targetRod);
+            printRodIterative(sourceRod, tempRod, targetRod);
         }
     }
     static void moveDisk(Stack<Integer> src, Stack<Integer> target, String srcName, String targetName) {
@@ -65,7 +78,7 @@ public class Main {
         }
     }
 
-    static void printRods(Stack<Integer> sourceRod, Stack<Integer> tempRod, Stack<Integer> targetRod) {
+    static void printRodIterative(Stack<Integer> sourceRod, Stack<Integer> tempRod, Stack<Integer> targetRod) {
         System.out.println("Source Rod: " + sourceRod);
         System.out.println("Temp Rod: " + tempRod);
         System.out.println("Target Rod: " + targetRod);
@@ -78,7 +91,16 @@ public class Main {
         System.out.println("Number of disks:");
         int numOfDisk = scanner.nextInt();
         if(userInput.equals("r")){
-            towerOfHanoiRecursive(numOfDisk, 'A', 'C', 'B');
+            Stack<Integer> sourceRod = new Stack<>();
+            Stack<Integer> targetRod = new Stack<>();
+            Stack<Integer> tempRod = new Stack<>();
+
+            // Put all the disk from the largest first into the source
+            for (int i = numOfDisk; i >= 1; i--) {
+                sourceRod.push(i);
+            }
+
+            towerOfHanoiRecursive(numOfDisk, sourceRod, targetRod, tempRod, "Source", "Target", "Temp");
         } else if(userInput.equals("i")){
             towerOfHanoiIterative(numOfDisk);
         } else{
